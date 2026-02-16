@@ -1,0 +1,4 @@
+.Rhistory
+.Rproj.user/
+renv/library/
+data/raw/
