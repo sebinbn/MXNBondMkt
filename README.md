@@ -4,7 +4,7 @@ This repository replicates the results in '[Impact of Foreign Ownership of Bonds
 
 1.  Clone the repository
 2.  Open R in project root
-3.  Run: source("run_all.R")
+3.  Run: source("MXNBnd_Replicate.R")
 
 Expected runtime: \~ 30 minutes
 
