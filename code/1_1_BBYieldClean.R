@@ -34,7 +34,7 @@ BBYield <- BBYield[order(BBYield$Date), ]
 #first_row stores row number of first value of each yield
 first_row      <- apply(!is.na(BBYield[, -1]), 2, function(x) which(x)[1])
 
-start_date_yield <- data.frame(
+BBYield_startdate <- data.frame(
   Variable   = names(first_row),
   Start_Date = BBYield$Date[first_row]
 )
