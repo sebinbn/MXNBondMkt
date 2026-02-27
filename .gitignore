@@ -1,8 +1,8 @@
 .Rhistory
 .Rproj.user/
-!.gitkeep
+
 renv/library/
-data/raw/*
+data/raw/MXYC_1mo30y_PLAST.xlsx
 data/clean/*
 output/figures/*
 output/tables/*
