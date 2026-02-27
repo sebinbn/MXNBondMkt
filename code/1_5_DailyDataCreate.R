@@ -11,3 +11,5 @@
 Mex_d  = merge(Yield_Data, Own_Data[,c("Date", "F_Own", "F_Own_p")])
 Mex_d  = merge(Mex_d, MXN)
 Mex_d  = merge(Mex_d, TIIE, all= T)
+
+message(sprintf("Dataframe with daily data for analysis created.") )

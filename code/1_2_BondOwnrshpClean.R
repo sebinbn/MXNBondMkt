@@ -83,3 +83,6 @@ save(Own_Data, file = file.path(DATA_CLEAN, "Own_Data.RData" ))
 
 # removing variables no longer necessary
 rm(Diff_pct, n_diff)
+message(sprintf("Data on ownership of bonds by various categories cleaned.\n
+                Cleaned data saved in %s", paste(getwd(),DATA_CLEAN, sep = "/")
+                ) )

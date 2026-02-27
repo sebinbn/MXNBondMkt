@@ -35,3 +35,7 @@ colnames(MXN)[-1] <- "MXN_USD"
 
 save(EFFR, IIP, TIIE, MXN, 
      file = file.path(DATA_CLEAN,"EFFR_IIP_TIIE_MXN_Clean.RData"))
+
+message(sprintf("Data on EFFR, US IIP, TIIE, MXN-USD cleaned.\n
+                Cleaned data saved in %s", paste(getwd(),DATA_CLEAN, sep = "/")
+) )
