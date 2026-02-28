@@ -30,7 +30,7 @@ message("Dataframe with daily data for analysis created.")
 #   - End:   MPTBA (1mo T-bill) is only available through March 2023; so ending 
 #     Dec 2022.
 
-Vars_TVVAR = c("MXY01M", "MXY03M", "MXY06M", "MXY01Y","MXY10Y", "MXY30Y",
+Vars_TVVAR = c("MXY01M", "MXY03M", "MXY06M", "MXY10Y", "MXY30Y",
              "TIIE", "MXN_USD","F_Own", "F_Own_p")
 
 all_weekdays = data.frame(
