@@ -1,6 +1,7 @@
 # PURPOSE:
 #   1. Merge data to create daily frequency dataframe.
-#   2. Create Mex_d_sub: a complete weekday grid (2008-03-01 to 2022-12-31) 
+#   2. Create Mex_d_sub and its first difference Mex_d_sub_diff.
+#      This is a complete weekday grid (2008-03-01 to 2022-12-31) 
 #      with key variables linearly interpolated across missing weekdays 
 #      (e.g. market holidays). This dataframe is used in TV-VAR analysis.
 #
@@ -16,7 +17,7 @@ Mex_d  = merge(Mex_d, TIIE, all= T)
 
 message("Dataframe with daily data for analysis created.")
 
-# 2. Creating Mex_d_sub - subset used in TV-VAR analysis------------
+# 2. Creating Mex_d_sub and Mex_d_sub_diff - subset used in TV-VAR analysis------------
 #
 # Mex_d contains data only on dates where observations exist. For TV_VAR,
 # a complete sequence of weekdays is needed so that lag structures are 
@@ -48,6 +49,13 @@ Mex_d_sub = merge(all_weekdays, Mex_d[,c("Date", Vars_TVVAR)], by = "Date", all.
 Mex_d_sub[Vars_TVVAR] = lapply(Mex_d_sub[Vars_TVVAR],
                                 na.approx, na.rm = FALSE)
 
+# Creating First differences (lapply required as diff() does not work on dataframes)
+Mex_d_sub_diff <- data.frame(
+  Date = Mex_d_sub$Date[-1],
+  lapply(Mex_d_sub[, Vars_TVVAR], diff)
+)
+
+# removing intermediate variables no longer necessary
 rm(all_weekdays)
 
-message("Complete weekday dataframe with interpolated values (Mex_d_sub) created.")
+message("Complete weekday dataframe with interpolated values (Mex_d_sub) and its first difference (Mex_d_sub) created.")
