@@ -41,6 +41,6 @@ Yield_Data_startdate <- data.frame(
 save(Yield_Data, file = file.path(DATA_CLEAN,"MXYield.RData"))
 rm(first_row)
 
-message(sprintf("Data on bond yields cleaned.\n
-                Cleaned data saved in %s", paste(getwd(),DATA_CLEAN, sep = "/")
+message(sprintf("Data on bond yields cleaned.Cleaned data saved in %s",
+                paste(getwd(),DATA_CLEAN, sep = "/")
 ) )

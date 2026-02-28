@@ -82,7 +82,8 @@ names(Own_Data)[names(Own_Data) == "SF65218_p"] <- "F_Own_p"
 save(Own_Data, file = file.path(DATA_CLEAN, "Own_Data.RData" ))
 
 # removing variables no longer necessary
-rm(Diff_pct, n_diff)
-message(sprintf("Data on ownership of bonds by various categories cleaned.\n
-                Cleaned data saved in %s", paste(getwd(),DATA_CLEAN, sep = "/")
+rm(Diff_pct, n_diff, prop_cols, prop_names)
+
+message(sprintf("Data on ownership of bonds by various categories cleaned. Cleaned data saved in %s",
+                paste(getwd(),DATA_CLEAN, sep = "/")
                 ) )
