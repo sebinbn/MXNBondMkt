@@ -12,8 +12,11 @@
 #
 # OUTPUT:
 #   Mex_m -- monthly data frame with columns:
-#                  Date, EFFR, IIP, TIIE, MXN_USD, F_Own, F_Own_p,
+#                  Date, EFFR, d_ln_IIP, TIIE, MXN_USD, F_Own, F_Own_p,
 #                  + all yield columns from Yield_Data
+#   Mex_m_diff  -- first difference of Mex_m except for for d_ln_IIP which is 
+#                 copied as is since it is already differenced.
+
 
 
 # 1. Build a monthly date spine (last calendar day of each month) ---------------
@@ -76,9 +79,16 @@ Mex_m <- cbind(
   Yield_m[, names(Yield_m) != "Date"]
 )
 
+Vars_diff <- names(Mex_m)[!names(Mex_m) %in% c("Date", "d_ln_IIP")]
+
+Mex_m_diff <- data.frame(
+  Date = Mex_m$Date[-1],
+  lapply(Mex_m[, Vars_diff], diff)
+)
+
 # Clean up intermediate objects --------------------------------------------
 
-message(sprintf("Monthly data from %s to %s generated from daily data and stored in Mex_m",
+message(sprintf("Monthly data from %s to %s generated from daily data and stored in Mex_m, and its first difference stored in Mex_m_diff",
                 month_ends[1], tail(month_ends,1) ))
 
 rm(EFFR_m, TIIE_m, MXN_m, F_Own_m, IIP_m, Yield_m, 
