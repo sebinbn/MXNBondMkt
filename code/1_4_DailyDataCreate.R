@@ -1,7 +1,7 @@
 # PURPOSE:
 #   1. Merge data to create daily frequency dataframe Mex_d and its first
 #       difference Mex_d_diff.
-#      This is a complete weekday grid (2008-03-01 to 2022-12-31) 
+#      Period: weekday grid from 2008-04-01 to 2022-12-31, 
 #      with key variables linearly interpolated across missing weekdays 
 #      (e.g. market holidays). This dataframe is used in TV-VAR analysis.
 #
@@ -30,10 +30,11 @@ all_weekdays = data.frame(
   }
 )
 
-Mex_d  = merge(all_weekdays, Yield_Data, by = "Date", all.x = TRUE)
-Mex_d = merge(Mex_d, Own_Data[,c("Date", "F_Own", "F_Own_p")], all.x = TRUE)
-Mex_d  = merge(Mex_d, MXN, all.x = TRUE)
-Mex_d  = merge(Mex_d, TIIE[,names(TIIE) != "Tgt_rate"], all.x = TRUE)
+Mex_d  = merge(all_weekdays, Yield_Data, by = "Date", all.x = T)
+Mex_d = merge(Mex_d, Own_Data[,c("Date", "F_Own", "F_Own_p")], all.x = T)
+Mex_d  = merge(Mex_d, MXN, all.x = T)
+Mex_d  = merge(Mex_d, TIIE[,names(TIIE) != "Tgt_rate"], all.x = T)
+Mex_d = merge(Mex_d, EFFR, all.x = T)
 
 ## 1.1 handling NA Values ---------------------------------------------
 obs_count = nrow(Mex_d[Mex_d$Date <= sample_start_end["end"], ])

@@ -1,7 +1,7 @@
 # PURPOSE:
 #   Build a monthly-frequency panel by aggregating daily data and merging
 #   it with the monthly IIP series.
-#
+#   Period: 2008-04-31 to 2022-12-31, 
 # INPUTS  (must already be in the R environment):
 #   Yield_Data     -- daily yields
 #   Own_Data    -- ownership data (Date, F_Own, F_Own_p, ...)
@@ -21,17 +21,22 @@
 
 # 1. Build a monthly date spine (last calendar day of each month) ---------------
 
-# Note: TIIE starts only from 2006-01-02 and so has an NA for 2006-01-01 which is 
-# a Sunday.
-# seq(as.Date("2006-01-31"), as.Date("2023-12-31"), by = "month") #does not create 
+# Note on choice of date to subset:
+#     1. TIIE starts only from 2006-01-02 and so has an NA for 2006-01-01 which is 
+#         a Sunday.
+#     2. MXY01Y starts only from 2008-04-01 which is latest starting point amongst
+#         all yields.
+#     3. All yields <1yr and some medium term are missing in 2023.
+#
+# seq(as.Date("2008-04-31"), as.Date("2022-12-31"), by = "month") #does not create 
 # end of months. 
-month_ends <- seq(as.Date("2006-02-01"), as.Date("2024-01-01"), by = "month") - 1
+month_ends <- seq(as.Date("2008-05-01"), as.Date("2023-01-01"), by = "month") - 1
 
 
 # 2. Helper: last non-NA observation within 10 calendar days of month end ------
 #    Works for any daily data frame whose first column is 'Date'.
 
-last_obs_monthly <- function(daily_df, date_col = "Date", n_lookback = 10) {
+last_obs_monthly <- function(daily_df, date_col = "Date", n_lookback = 5) {
   dates  <- daily_df[[date_col]]
   values <- daily_df[, -which(names(daily_df) == date_col), drop = FALSE]
   
@@ -47,51 +52,38 @@ last_obs_monthly <- function(daily_df, date_col = "Date", n_lookback = 10) {
 }
 
 
-# 3. Aggregate daily series to monthly ----------------------------------------
-
-EFFR_m  <- last_obs_monthly(EFFR)
-TIIE_m  <- last_obs_monthly(TIIE)
-MXN_m   <- last_obs_monthly(MXN)         
-Yield_m <- last_obs_monthly(Yield_Data)
-F_Own_m   <- last_obs_monthly(Own_Data[,c("Date", "F_Own", "F_Own_p")])
-
 
 # 4. IIP: compute 12-month log-difference of industrial production -------------
 # Since IIP data is already monthly, no need to use last_obs_monthly. However,
 # the dates are the first days of the month. So, subsetting uses first of month
 
-d_ln_IIP <- diff(log(IIP[IIP$Date >= as.Date("2005-01-01") &
-                             IIP$Date <= as.Date("2023-12-01"), "INDPRO" ]),
+d_ln_IIP <- diff(log(IIP[IIP$Date >= as.Date("2007-04-01") &
+                             IIP$Date <= as.Date("2022-12-01"), "INDPRO" ]),
                  lag = 12) * 100
 IIP_m   <- data.frame(Date = month_ends,
                            d_ln_IIP = d_ln_IIP)
 
+# 3. Aggregate daily series to monthly and merge with IIP ----------------------
 
-# 5. Merge all series into one monthly panel ----------------------------------
+Mex_m = last_obs_monthly(Mex_d)
+Mex_m = merge(Mex_m, IIP_m)
 
-Mex_m <- cbind(
-  EFFR_m[c("Date", "EFFR")],
-  TIIE  = TIIE_m$TIIE,
-  MXN_USD = MXN_m$MXN_USD,
-  F_Own   = F_Own_m$F_Own,
-  F_Own_p = F_Own_m$F_Own_p,
-  d_ln_IIP = IIP_m$d_ln_IIP,
-  Yield_m[, names(Yield_m) != "Date"]
-)
+# 5. Create first differenced monthly dataframe --------------------------------
 
 Vars_diff <- names(Mex_m)[!names(Mex_m) %in% c("Date", "d_ln_IIP")]
 
 Mex_m_diff <- data.frame(
   Date = Mex_m$Date[-1],
-  lapply(Mex_m[, Vars_diff], diff)
+  lapply(Mex_m[, Vars_diff], diff),
+  d_ln_IIP = Mex_m$d_ln_IIP[-1]
 )
+
 
 # Clean up intermediate objects --------------------------------------------
 
 message(sprintf("Monthly data from %s to %s generated from daily data and stored in Mex_m, and its first difference stored in Mex_m_diff",
                 month_ends[1], tail(month_ends,1) ))
 
-rm(EFFR_m, TIIE_m, MXN_m, F_Own_m, IIP_m, Yield_m, 
-   month_ends, d_ln_IIP, last_obs_monthly)
+rm(month_ends, IIP_m, d_ln_IIP, last_obs_monthly, Vars_diff)
 
 
