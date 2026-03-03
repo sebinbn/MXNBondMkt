@@ -12,7 +12,7 @@
 #     Dec 2022.
 #
 # INPUT:  TIIE, MXN, Yield_Data, Own_Data
-# OUTPUT: Mex_d, Mex_d_diff
+# OUTPUT: Mex_d, Mex_d_diff, Mex_d_NA (a count of how many NAs in sample)
 # CALLED BY: MXNBnd_Replicate.R
 
 # 1. Merging and Creating Daily Data -----------------------------------------
@@ -35,30 +35,49 @@ Mex_d = merge(Mex_d, Own_Data[,c("Date", "F_Own", "F_Own_p")], all.x = TRUE)
 Mex_d  = merge(Mex_d, MXN, all.x = TRUE)
 Mex_d  = merge(Mex_d, TIIE[,names(TIIE) != "Tgt_rate"], all.x = TRUE)
 
+## 1.1 handling NA Values ---------------------------------------------
+obs_count = nrow(Mex_d[Mex_d$Date <= sample_start_end["end"], ])
+na_count = colSums(is.na(Mex_d[Mex_d$Date <= sample_start_end["end"], ])) 
+Mex_d_NA = data.frame(
+  Variable        = names(na_count),
+  NA_count        = na_count,
+  NA_pct          = sprintf("%.1f %%", na_count/obs_count*100),
+  row.names       = NULL
+)
+message(sprintf(
+  "In the daily data sample from %s to %s with %d observations, missing values by variable:",
+  sample_start_end["start"], sample_start_end["end"], obs_count
+))
+print(Mex_d_NA, row.names = FALSE)
+
+Vars_d_NA = names(Mex_d)[colMeans(is.na(Mex_d)) > 0]
 # Linearly interpolate over missing weekdays (market holidays) for key variables.
 # na.rm = FALSE preserves leading/trailing NAs rather than extrapolating.
-Vars_d_NA = names(Mex_d)[colMeans(is.na(Mex_d)) > 0]
 Mex_d[Vars_d_NA] = lapply(Mex_d[Vars_d_NA],na.approx, na.rm = FALSE)
 
 # subsetting to choose sample period
 Mex_d = Mex_d[Mex_d$Date <= sample_start_end["end"],]
 
 Vars_d_NA = names(Mex_d)[colMeans(is.na(Mex_d)) > 0]
-message(sprintf("Despite subsetting from %s to %s, %s have missing values which are linearly interpolated using na.approx()",
-                sample_start_end["start"], sample_start_end["end"],
+message(sprintf("Despite interpolation, %s has missing values because of trailing NAs.",
                 paste(Vars_d_NA, collapse = ", ")
 ))
 
-message("Dataframe with daily data for analysis created.")
+# MXY09Y is missing after 2018-05-22. these are now filled in as the average of the 
+# 8 and 10 year yields.
+Mex_d$MXY09Y[is.na(Mex_d$MXY09Y)] = rowMeans(
+  Mex_d[is.na(Mex_d$MXY09Y), c("MXY08Y", "MXY10Y")])
+message("These NAs filled as the average of neighboring yields.")
 
+# 2. Creating First Differenced Data -----------------------------------------
 
-# Creating First differences (lapply required as diff() does not work on dataframes)
+# lapply required as diff() does not work on dataframes
 Mex_d_diff <- data.frame(
   Date = Mex_d$Date[-1],
-  lapply(Mex_d[, Vars_TVVAR], diff)
+  lapply(Mex_d[, names(Mex_d) != "Date"], diff)
 )
 
 # removing intermediate variables no longer necessary
-rm(all_weekdays, all_days, Vars_d_NA)
+rm(all_weekdays, all_days, Vars_d_NA, obs_count, na_count)
 
-message("Complete weekday dataframe with interpolated values (Mex_d_sub) and its first difference (Mex_d_sub) created.")
+message("Weekday dataframe (Mex_d) and its first difference (Mex_d_diff) created.")
