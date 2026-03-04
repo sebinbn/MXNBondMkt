@@ -12,8 +12,8 @@
 #
 # OUTPUT:
 #   Mex_m -- monthly data frame with columns:
-#                  Date, EFFR, d_ln_IIP, TIIE, MXN_USD, F_Own, F_Own_p,
-#                  + all yield columns from Yield_Data
+#                  Date, EFFR, d_ln_IIP, TIIE, MXN_USD, F_Own (Bns of Pesos), F_Own_p,
+#                  + all yield columns (in pp) from Yield_Data
 #   Mex_m_diff  -- first difference of Mex_m except for for d_ln_IIP which is 
 #                 copied as is since it is already differenced.
 

@@ -22,7 +22,7 @@ yield_names = c("MXY01M", "MXY03M", "MXY06M", "MXY09M", "MXY01Y", "MXY02Y",
 SURData = Mex_m_diff
 SURData[yield_names] = SURData[yield_names] * 100 #convert pp to bps
 SURData["TIIE"] = SURData["TIIE"] * 100
-
+SURData["F_Own"] = SURData["F_Own"] / 10 #convert to tens of Bns of Pesos 
 ## 2. First stage regression -------------------------------------------------
 
 Stg1_result = lm(F_Own ~ 0 + EFFR + d_ln_IIP, data = SURData)
@@ -57,7 +57,7 @@ SUR_result = systemfit(eq_list, data = SURData, method = "SUR")
 
 ### Tabulate results --------------------------------------------------------
 
-# Stg1_result_fitted is the 1st regressor in each equation => every other coefficient.
+# Index picking F_Own_Fit coefficients
 F_Own_fit_idx <- seq(1, length(SUR_result$coefficients), by = 2)
 
 SUREIV_tab <- data.frame(
@@ -75,8 +75,8 @@ SUREIV_tab$pValue <- (1 - pnorm(abs(SUREIV_tab$F_Own_coef) / SUREIV_tab$tFse)) *
 short_term_yields <- c("MXY01M", "MXY03M", "MXY01Y")
 long_term_yields  <- c("MXY10Y", "MXY20Y", "MXY30Y")
 
-# linearHypothesis() uses a constraint vector over all SUR coefficients.
-# Following function builds that vector for each hypothesis.
+# linearHypothesis() uses a constraint matrix over all SUR coefficients. For 9 
+# hypothesis on the 34 estimated SUR coefficients, I generate a 9 * 34 matrix
 H <- matrix(0, nrow = 9, ncol = length(coef_names),
             dimnames = list(
               paste0(rep(short_term_yields, each = 3), " = ",
@@ -89,15 +89,21 @@ for (i in 1:nrow(H)) {
   H[i, paste0(long_term_yields[((i-1) %% 3) + 1], "_F_Own_fit")] <- -1
 }
 
-linearHypothesis(SUR_result, hypothesis.matrix = H)
-
 wald_tests <- lapply(1:nrow(H), function(i) {
   linearHypothesis(SUR_result, hypothesis.matrix = H[i, , drop = FALSE])
 })
 names(wald_tests) <- rownames(H)
 
+### Tabulate results --------------------------------------------------------
+Wald_tab <- data.frame(
+  Hypothesis = names(wald_tests),
+  Difference_in_bps = sapply(1:nrow(H), function(i) (H[i, ] %*% coef(SUR_result))[1]),
+  F_stat     = sapply(wald_tests, function(x) x$F[2]),
+  p_value    = sapply(wald_tests, function(x) x$"Pr(>F)"[2]),
+  row.names  = NULL
+)
 
-print(wald_tests)
+write.csv(Wald_tab, file.path(TAB_PATH, "Wald_Tests.csv"), row.names = FALSE)
 
 # Remove intermediate variables ----------------------------------------------
 
