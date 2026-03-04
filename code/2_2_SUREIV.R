@@ -47,9 +47,6 @@ tFCorr = 1.935 + (8.473 - Stg1_F)/(8.473 - 8.196)* (1.98-1.935)
 
 SURData$F_Own_fit = Stg1_result$fitted.values
 
-### SURE Estimation ---------------------------------------------------------
-
-
 # build each equation formula
 eq_list = lapply(yield_names, function(y) {
   as.formula( paste0( y, " ~ 0 + F_Own_fit + TIIE") )
@@ -57,7 +54,6 @@ eq_list = lapply(yield_names, function(y) {
 names(eq_list) = yield_names
 
 SUR_result = systemfit(eq_list, data = SURData, method = "SUR")
-summary(SUR_result)
 
 ### Tabulate results --------------------------------------------------------
 
@@ -75,23 +71,34 @@ SUREIV_tab$pValue <- (1 - pnorm(abs(SUREIV_tab$F_Own_coef) / SUREIV_tab$tFse)) *
 
 # 4. Wald Tests ---------------------------------------------------------
 
-wald_hypotheses <- c(
-  "MXY01M_F_Own_fit - MXY30Y_F_Own_fit = 0",
-  "MXY03M_F_Own_fit - MXY30Y_F_Own_fit = 0",
-  "MXY01Y_F_Own_fit - MXY30Y_F_Own_fit = 0",
-  "MXY01M_F_Own_fit - MXY20Y_F_Own_fit = 0",
-  "MXY03M_F_Own_fit - MXY20Y_F_Own_fit = 0",
-  "MXY01Y_F_Own_fit - MXY20Y_F_Own_fit = 0",
-  "MXY01M_F_Own_fit - MXY10Y_F_Own_fit = 0",
-  "MXY03M_F_Own_fit - MXY10Y_F_Own_fit = 0",
-  "MXY01Y_F_Own_fit - MXY10Y_F_Own_fit = 0"
-)
+# Maturity pairs to test: each short-term vs. each long-term yield
+short_term_yields <- c("MXY01M", "MXY03M", "MXY01Y")
+long_term_yields  <- c("MXY10Y", "MXY20Y", "MXY30Y")
 
-wald_tests <- lapply(wald_hypotheses,
-                     function(h) hypotheses(SUR_result, hypothesis = h))
-names(wald_tests) <- wald_hypotheses
+# linearHypothesis() uses a constraint vector over all SUR coefficients.
+# Following function builds that vector for each hypothesis.
+H <- matrix(0, nrow = 9, ncol = length(coef_names),
+            dimnames = list(
+              paste0(rep(short_term_yields, each = 3), " = ",
+                     long_term_yields),
+              coef_names
+            ))
+
+for (i in 1:nrow(H)) {
+  H[i, paste0(short_term_yields[ceiling(i/3)], "_F_Own_fit")] <-  1
+  H[i, paste0(long_term_yields[((i-1) %% 3) + 1], "_F_Own_fit")] <- -1
+}
+
+linearHypothesis(SUR_result, hypothesis.matrix = H)
+
+wald_tests <- lapply(1:nrow(H), function(i) {
+  linearHypothesis(SUR_result, hypothesis.matrix = H[i, , drop = FALSE])
+})
+names(wald_tests) <- rownames(H)
+
 
 print(wald_tests)
+
 # Remove intermediate variables ----------------------------------------------
 
 rm(yield_names, SURData, Stg1_F, tFCorr, F_Own_fit_idx)
