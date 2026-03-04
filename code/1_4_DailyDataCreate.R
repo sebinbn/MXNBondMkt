@@ -30,7 +30,8 @@ all_weekdays = data.frame(
   }
 )
 
-Mex_d  = merge(all_weekdays, Yield_Data, by = "Date", all.x = T)
+Mex_d  = merge(all_weekdays, Yield_Data[,names(Yield_Data) != "MXY01W"],
+               by = "Date", all.x = T)
 Mex_d = merge(Mex_d, Own_Data[,c("Date", "F_Own", "F_Own_p")], all.x = T)
 Mex_d  = merge(Mex_d, MXN, all.x = T)
 Mex_d  = merge(Mex_d, TIIE[,names(TIIE) != "Tgt_rate"], all.x = T)
