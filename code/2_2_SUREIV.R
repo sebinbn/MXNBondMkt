@@ -8,9 +8,9 @@
 #
 # INPUT:  Mex_m_diff
 # OUTPUT: SUREIV_tab  (data.frame: coef, SE, tF-corrected SE, p-value per yield)
-#         wald_tests    (list of marginaleffects::hypotheses() Wald test results)
+#         Wald_tab (data.frame: Hypothesis, difference, F-stat, p-value)
 #         Stg1_result - lm() output of Stage 1 regresion
-#         SUR_result  - systemfit() output of Stage 2 SUR
+#         
 # CALLED BY: MXNBnd_Replicate.R
 
 ## 1. Setting up data -------------------------------------------------
@@ -69,6 +69,8 @@ SUREIV_tab <- data.frame(
 SUREIV_tab$tFse   <- SUREIV_tab$se * tFCorr
 SUREIV_tab$pValue <- (1 - pnorm(abs(SUREIV_tab$F_Own_coef) / SUREIV_tab$tFse)) * 2
 
+write.csv(SUREIV_tab, file.path(TAB_PATH, "SUREIV_result.csv"), row.names = FALSE)
+
 # 4. Wald Tests ---------------------------------------------------------
 
 # Maturity pairs to test: each short-term vs. each long-term yield
@@ -77,11 +79,11 @@ long_term_yields  <- c("MXY10Y", "MXY20Y", "MXY30Y")
 
 # linearHypothesis() uses a constraint matrix over all SUR coefficients. For 9 
 # hypothesis on the 34 estimated SUR coefficients, I generate a 9 * 34 matrix
-H <- matrix(0, nrow = 9, ncol = length(coef_names),
+H <- matrix(0, nrow = 9, ncol = length(SUR_result$coefficients),
             dimnames = list(
               paste0(rep(short_term_yields, each = 3), " = ",
                      long_term_yields),
-              coef_names
+              names(SUR_result$coefficients)
             ))
 
 for (i in 1:nrow(H)) {
@@ -103,8 +105,13 @@ Wald_tab <- data.frame(
   row.names  = NULL
 )
 
-write.csv(Wald_tab, file.path(TAB_PATH, "Wald_Tests.csv"), row.names = FALSE)
+write.csv(Wald_tab, file.path(TAB_PATH, "Wald_Result.csv"), row.names = FALSE)
 
 # Remove intermediate variables ----------------------------------------------
 
-rm(yield_names, SURData, Stg1_F, tFCorr, F_Own_fit_idx)
+rm(yield_names, SURData, Stg1_F, tFCorr, F_Own_fit_idx, eq_list, SUR_result,
+   wald_tests, H,i, short_term_yields, long_term_yields)
+
+message(sprintf("SURE-IV estimated and result saved in %s. Wald tests for equality of coefficients run and saved in %s. Both are in %s",
+                "SUREIV_result.csv", "Wald_Result.csv", paste(getwd(),TAB_PATH,sep = "/")
+        ) )
