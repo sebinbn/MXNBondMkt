@@ -5,6 +5,7 @@ library(reshape2)     #for using melt() which converts data to long format conve
 library(ggplot2)      #for plots
 library(zoo)          #for na.approx() used in 1_4_dailyDataCreate.R
 library(urca)         #for ur.df used in 2_1_ADFTest.R
+library(systemfit)    #for SUR estimation using systemfit()
 library(tvReg)        #for tvvar and tvirf
 
 message("Necessary packages loaded into enviroment")

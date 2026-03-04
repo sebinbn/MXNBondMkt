@@ -22,9 +22,9 @@ source("code/1_4_DailyDataCreate.R")
 source("code/1_5_MonthlyDataCreate.R")
 
 # Data Analysis
-source("code/TVVARmods.R")
 source("code/2_1_ADFTest.R")
-
+source("code/2_2_SUREIV.R")
+source("code/TVVARmods.R")
 
 # Generating Figures
 
