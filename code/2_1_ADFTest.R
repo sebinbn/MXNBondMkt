@@ -64,7 +64,7 @@ write.csv(ADF_m_tab, file = file.path(TAB_PATH, "ADF_results_monthly.csv"),
 
 # removing intermediate variables no longer necessary -------------------------
 
-rm(adf_levels, adf_diff, run_adf, tabulate_adf, Vars_m_ADF)
+rm(adf_levels, adf_diff, run_adf, tabulate_adf, Vars_m_ADF, Vars_TVVAR)
 
 message(sprintf("ADF test run on daily and monthly data. Result saved in %s, daily results in %s and monthly results in %s",
                 paste(getwd(),TAB_PATH,sep = "/"), "ADF_results_daily.csv",
