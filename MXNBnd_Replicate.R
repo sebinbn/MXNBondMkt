@@ -29,3 +29,5 @@ source("code/TVVARmods.R")
 # Generating Figures
 
 source("code/3_Mex_RvF_mat.R")
+source("code/3_SUREIV.R")
+source("code/3_TVVAR.R")
