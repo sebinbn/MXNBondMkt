@@ -68,7 +68,6 @@ IIP_m   <- data.frame(Date = month_ends,
 Mex_m = last_obs_monthly(Mex_d)
 Mex_m = merge(Mex_m, IIP_m)
 
-Mex_m$F_Own = Mex_m$F_Own/1000 #converting to billions of Pesos
 
 # 5. Create first differenced monthly dataframe --------------------------------
 
