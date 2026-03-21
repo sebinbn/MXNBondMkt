@@ -45,19 +45,23 @@ mat_long <- melt(
 Mat_plot <- ggplot(data = mat_long, aes(x = Date, y = value, color = variable)) +
   geom_line(linewidth = 1.25) +
   scale_color_discrete(labels = c("Residents", "Non-Residents", "Total")) +
-  labs(x = element_blank(), y = "Share of long term bonds in total holdings") +
+  labs(x = NULL, y = "Share of long term bonds in total holdings") +
   theme(
     axis.text         = element_text(size = 14),
     axis.title        = element_text(size = 14),
     legend.position   = c(0.1, 0.9),
     legend.title      = element_blank(),
-    legend.background = element_rect(linetype = "solid", colour = "darkblue")
+    legend.background = element_rect(linetype = "solid", colour = "black")
   )
 
 
 # 5. Save -----------------------------------------------------------------
-
-ggsave(file.path(FIG_PATH, "Mex_RvF_Mat.png"), plot = Mat_plot,
+filename = "Mex_RvF_Mat.png"
+ggsave(file.path(FIG_PATH,filename), plot = Mat_plot,
        width = 10, height = 6, dpi = 300)
 
-rm(BM_Mat, Mex_mat, mat_long)
+rm(BM_Mat, Mex_mat, mat_long, filename)
+
+message(sprintf("Plot of share of long term bonds held by various classes saved as %s",
+                paste(getwd(),FIG_PATH,filename,sep = "/")
+) )
