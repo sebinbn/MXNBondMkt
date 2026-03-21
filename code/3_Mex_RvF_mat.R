@@ -56,12 +56,13 @@ Mat_plot <- ggplot(data = mat_long, aes(x = Date, y = value, color = variable)) 
 
 
 # 5. Save -----------------------------------------------------------------
+
 filename = "Mex_RvF_Mat.png"
 ggsave(file.path(FIG_PATH,filename), plot = Mat_plot,
        width = 10, height = 6, dpi = 300)
 
-rm(BM_Mat, Mex_mat, mat_long, filename)
-
 message(sprintf("Plot of share of long term bonds held by various classes saved as %s",
                 paste(getwd(),FIG_PATH,filename,sep = "/")
 ) )
+
+rm(BM_Mat, Mex_mat, mat_long, filename)
