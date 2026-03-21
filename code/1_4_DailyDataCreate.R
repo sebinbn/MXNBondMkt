@@ -12,7 +12,9 @@
 #     Dec 2022.
 #
 # INPUT:  TIIE, MXN, Yield_Data, Own_Data
-# OUTPUT: Mex_d, Mex_d_diff, Mex_d_NA (a count of how many NAs in sample)
+# OUTPUT: Mex_d, Mex_d_diff, Mex_d_NA (a count of how many NAs in sample).
+#         Notes: Yields converted from pps to bps.
+#                F_Own converted from Mns Pesos to Bns Pesos
 # CALLED BY: MXNBnd_Replicate.R
 
 # 1. Merging and Creating Daily Data -----------------------------------------
@@ -70,6 +72,13 @@ message(sprintf("Despite interpolation, %s has missing values because of trailin
 Mex_d$MXY09Y[is.na(Mex_d$MXY09Y)] = rowMeans(
   Mex_d[is.na(Mex_d$MXY09Y), c("MXY08Y", "MXY10Y")])
 message("These NAs filled as the average of neighboring yields.")
+
+## 1.2 Adjusting units ---------------------------------------------
+
+yield_cols = !colnames(Mex_d) %in% c("Date", "F_Own", "F_Own_p", "MXN_USD")
+Mex_d[yield_cols] = Mex_d[yield_cols] * 100 #converting to bps
+Mex_d["F_Own"] = Mex_d["F_Own"]/1000  #converting to Bns of Pesos
+message("Yields converted to bps and F_Own converted to Bns of MXN Pesos")
 
 # 2. Creating First Differenced Data -----------------------------------------
 
