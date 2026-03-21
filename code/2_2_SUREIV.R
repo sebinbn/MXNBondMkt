@@ -15,13 +15,7 @@
 
 ## 1. Setting up data -------------------------------------------------
 
-yield_names = c("MXY01M", "MXY03M", "MXY06M", "MXY09M", "MXY01Y", "MXY02Y",
-                "MXY03Y", "MXY04Y", "MXY05Y", "MXY06Y", "MXY07Y", "MXY08Y",
-                "MXY09Y", "MXY10Y", "MXY15Y", "MXY20Y", "MXY30Y")
-
 SURData = Mex_m_diff
-SURData[yield_names] = SURData[yield_names] * 100 #convert pp to bps
-SURData["TIIE"] = SURData["TIIE"] * 100
 SURData["F_Own"] = SURData["F_Own"] / 10 #convert to tens of Bns of Pesos 
 ## 2. First stage regression -------------------------------------------------
 
@@ -46,6 +40,9 @@ tFCorr = 1.935 + (8.473 - Stg1_F)/(8.473 - 8.196)* (1.98-1.935)
 # 3. Second stage SURE -------------------------------------------------
 
 SURData$F_Own_fit = Stg1_result$fitted.values
+yield_names = c("MXY01M", "MXY03M", "MXY06M", "MXY09M", "MXY01Y", "MXY02Y",
+                "MXY03Y", "MXY04Y", "MXY05Y", "MXY06Y", "MXY07Y", "MXY08Y",
+                "MXY09Y", "MXY10Y", "MXY15Y", "MXY20Y", "MXY30Y")
 
 # build each equation formula
 eq_list = lapply(yield_names, function(y) {
