@@ -21,13 +21,15 @@
 
 sample_start_end = c(start = as.Date("2008-04-01"), end = as.Date("2022-12-31"))
 
+
 all_weekdays = data.frame(
   Date = {
     all_days = seq.Date(from = sample_start_end["start"],
-                        to   = as.Date("2023-12-31"), 
+                        to = sample_start_end["end"] %m+% years(1),
                         by   = "day")
     #MXY06Y and MXY08Y have missing values in 2022, but values available in 2023.
-    #To use 2023 values to interpolate, ending date is 2023. It is later subsetted to 2022.
+    #To use values upto a year ahead to interpolate, ending date is 2023.
+    # It is later subsetted back to 2022.
     all_days[!weekdays(all_days) %in% c("Saturday", "Sunday")]
   }
 )
@@ -60,7 +62,8 @@ Vars_d_NA = names(Mex_d)[colMeans(is.na(Mex_d)) > 0]
 Mex_d[Vars_d_NA] = lapply(Mex_d[Vars_d_NA],na.approx, na.rm = FALSE)
 
 # subsetting to choose sample period
-Mex_d = Mex_d[Mex_d$Date <= sample_start_end["end"],]
+Mex_d = Mex_d[(Mex_d$Date <= sample_start_end["end"]) & 
+                (Mex_d$Date >= sample_start_end["start"]), ]
 
 Vars_d_NA = names(Mex_d)[colMeans(is.na(Mex_d)) > 0]
 message(sprintf("Despite interpolation, %s has missing values because of trailing NAs.",

@@ -9,6 +9,7 @@
 #   IIP         -- monthly industrial production (DATE, INDPRO)
 #   TIIE        -- daily policy / overnight rate (Date, Tgt_rate, TIIE)
 #   MXN         -- daily exchange rate (Date, MXN_USD)
+#   sample_start_end - sample period decided in 1_4_DailyDataCreate.R
 #
 # OUTPUT:
 #   Mex_m -- monthly data frame with columns:
@@ -28,10 +29,11 @@
 #         all yields.
 #     3. All yields <1yr and some medium term are missing in 2023.
 #
-# seq(as.Date("2008-04-31"), as.Date("2022-12-31"), by = "month") #does not create 
-# end of months. 
-month_ends <- seq(as.Date("2008-05-01"), as.Date("2023-01-01"), by = "month") - 1
 
+
+month_ends <- seq(ceiling_date(sample_start_end["start"], unit = "month"),
+                  ceiling_date(sample_start_end["end"], unit = "month"),
+                  by = "month") -  days(1)
 
 # 2. Helper: last non-NA observation within 10 calendar days of month end ------
 #    Works for any daily data frame whose first column is 'Date'.
@@ -57,9 +59,13 @@ last_obs_monthly <- function(daily_df, date_col = "Date", n_lookback = 5) {
 # Since IIP data is already monthly, no need to use last_obs_monthly. However,
 # the dates are the first days of the month. So, subsetting uses first of month
 
-d_ln_IIP <- diff(log(IIP[IIP$Date >= as.Date("2007-04-01") &
-                             IIP$Date <= as.Date("2022-12-01"), "INDPRO" ]),
-                 lag = 12) * 100
+d_ln_IIP <- diff(
+  log(IIP[
+    IIP$Date >= floor_date(sample_start_end["start"], unit = "month") %m-% years(1) &
+      IIP$Date <= floor_date(sample_start_end["end"], unit = "month"),
+    "INDPRO" ]),
+  lag = 12) * 100
+
 IIP_m   <- data.frame(Date = month_ends,
                            d_ln_IIP = d_ln_IIP)
 
