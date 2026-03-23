@@ -8,13 +8,12 @@
 # INPUT:  <DATA_RAW>/IIP_lblty_GG_vOct2025.csv (in Mns USD)
 #         <DATA_RAW>/imf-dm-export-20260322.xls (in Bns USD)
 #         
-# OUTPUT: <DATA_CLEAN>/IMF_GDebt_FO_EM_2004-24.csv (in Tns USD and Share of GDP)
+# OUTPUT: <DATA_CLEAN>/FoInGDebt_2004-24.csv (in Bns USD)
+#         <DATA_CLEAN>/FOInGDebt_share_2004-24.csv (Share of GDP)
 #         
 # CALLED BY: MXNBnd_Replicate.R
 
 # 1. Import IMF Data  ----------------------------------------------
-
-required_cols = c("COUNTRY", "TIME_PERIOD", "OBS_VALUE")
 
 imf_raw = read.csv(file.path(DATA_RAW, "IIP_lblty_GG_vOct2025.csv" ),
                    check.names = FALSE)
@@ -41,7 +40,7 @@ eme_year_grid = expand.grid(Country = eme_countries, Year = 2004:2024,
 GDebt_FO_EM = merge(eme_year_grid,imf_subset,
                     by.x = c("Country", "Year"),  by.y = c("COUNTRY", "TIME_PERIOD"),
                     all.x = TRUE)
-GDebt_FO_EM$OBS_VALUE = GDebt_FO_EM$OBS_VALUE/1000000  #converting to Tns of USD
+GDebt_FO_EM$OBS_VALUE = GDebt_FO_EM$OBS_VALUE/1000000000  #converting to Bns of USD
 
 message(sprintf(
   "Note: EMEs that dont have data in IMF PIP dataset for any year between 2004 and 2024 are: \n%s",
@@ -65,8 +64,9 @@ names(GDebt_FO_EM)[-1] = substr(names(GDebt_FO_EM)[-1],
 GDebt_FO_EM$Total = rowSums(GDebt_FO_EM[,names(GDebt_FO_EM) != "Year"], na.rm = T)
 
 
-# 4. Save data, remove intermediates ------------------------------------------
-filename = "IMF_EM_GDebt_2004-24.csv"
+# 4. Save Foreign Owned Gov debt data ------------------------------------------
+
+filename = "FoInGDebt_2004-24.csv" 
 write.csv(GDebt_FO_EM, file = file.path(DATA_CLEAN, filename),
     row.names = FALSE )
 
@@ -75,7 +75,7 @@ message(sprintf(
   file.path(getwd(), DATA_CLEAN, filename)
 ))
 
-#5. Load GDP Data --------------------------------------------
+#5. Load GDP Data and subset EM data -----------------------------------------
 
 gdp_raw = read_xls(file.path(DATA_RAW, "imf-dm-export-20260322.xls" ) )
 names(gdp_raw)[1] = "Country"
@@ -85,7 +85,40 @@ names(gdp_raw)[1] = "Country"
 eme_countries[
   eme_countries %in% c("Egypt, Arab Republic of","Poland, Republic of")
   ] = c("Egypt", "Poland")
+
 gdp_subset = gdp_raw[which(gdp_raw$Country %in% eme_countries),]
+year_cols = as.character(2004:2024)
+gdp_subset = gdp_subset[, c("Country", year_cols)]
+gdp_subset[,year_cols] = apply(gdp_subset[,year_cols],2, as.numeric)
+
+#6. Calculate share of GDP  -----------------------------------------
+
+mat <- as.matrix(gdp_subset[, names(gdp_subset) != "Country"])
+rownames(mat) <- gdp_subset$Country
+
+GDP_EM = as.data.frame(t(mat))
+GDP_EM$Year <- rownames(GDP_EM)
+rownames(GDP_EM) <- NULL
+GDP_EM <- GDP_EM[, c("Year", setdiff(names(GDP_EM), "Year"))]
+
+GDebt_shares = data.frame(
+  Year = GDebt_FO_EM$Year,
+  GDebt_FO_EM[,!names(GDebt_FO_EM) %in% c("Year", "Total")]/
+    GDP_EM[,names(GDP_EM) != "Year"]
+)
+
+GDebt_shares$Total = rowMeans(GDebt_shares[, names(GDebt_shares) != "Year"], na.rm = TRUE)
+
+# 7. Save Share of GDP data ------------------------------------------
+filename = "FOInGDebt_share_2004-24.csv"
+write.csv(GDebt_shares, file = file.path(DATA_CLEAN, filename),
+          row.names = FALSE )
+
+message(sprintf(
+  "Table with EME's Foreign Owned Gov debt as share of GDP saved in %s",
+  file.path(getwd(), DATA_CLEAN, filename)
+))
 
 
-rm(required_cols, imf_raw, imf_subset, eme_countries, eme_year_grid, filename)
+rm(imf_raw, imf_subset, eme_countries, eme_year_grid, 
+   gdp_raw, gdp_subset, year_cols, mat, GDP_EM, filename)

@@ -26,6 +26,8 @@ source("code/1_3_EFFR_IIP_TIIE_xrateClean.R")
 source("code/1_4_DailyDataCreate.R")
 source("code/1_5_MonthlyDataCreate.R")
 
+source("code/1_6_IMF-PIP-EMDataCreate.R")
+
 # Data Analysis
 source("code/2_1_SummStats.R")
 source("code/2_2_ADFTest.R")
