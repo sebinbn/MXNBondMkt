@@ -2,10 +2,13 @@
 #   1. Import IMF annual data on foreign liabilities in government debt from DATA_RAW.
 #   2. Extract data for 20 EMEs (as defined by IMF) from 2004 to 2024.
 #   3. Save a cleaned country-year table and sum of EME liability to DATA_CLEAN.
+#   4. Import GDP data from IMF World Economic Outlook 2025 and calculate foreign
+#       liability as share of GDP.
 #
 # INPUT:  <DATA_RAW>/IIP_lblty_GG_vOct2025.csv (in Mns USD)
+#         <DATA_RAW>/imf-dm-export-20260322.xls (in Bns USD)
 #         
-# OUTPUT: <DATA_CLEAN>/IMF_GDebt_FO_EM_2004-24.csv (in Tns USD)
+# OUTPUT: <DATA_CLEAN>/IMF_GDebt_FO_EM_2004-24.csv (in Tns USD and Share of GDP)
 #         
 # CALLED BY: MXNBnd_Replicate.R
 
@@ -17,7 +20,6 @@ imf_raw = read.csv(file.path(DATA_RAW, "IIP_lblty_GG_vOct2025.csv" ),
                    check.names = FALSE)
 imf_raw = imf_raw[,c("COUNTRY", "TIME_PERIOD", "OBS_VALUE")]
 imf_raw$OBS_VALUE = as.numeric(imf_raw$OBS_VALUE)
-
 imf_subset = imf_raw[imf_raw$TIME_PERIOD >= 2004 & imf_raw$TIME_PERIOD <= 2024,]
 
 # 2. Match EMEs to country names in the IMF file ---------------------------
@@ -72,5 +74,18 @@ message(sprintf(
   "Table with EME's Foreign Owned Gov debt saved in %s",
   file.path(getwd(), DATA_CLEAN, filename)
 ))
+
+#5. Load GDP Data --------------------------------------------
+
+gdp_raw = read_xls(file.path(DATA_RAW, "imf-dm-export-20260322.xls" ) )
+names(gdp_raw)[1] = "Country"
+
+# Egypt and Poland named differently in GDP dataset and has to be accounted before
+# data extraction
+eme_countries[
+  eme_countries %in% c("Egypt, Arab Republic of","Poland, Republic of")
+  ] = c("Egypt", "Poland")
+gdp_subset = gdp_raw[which(gdp_raw$Country %in% eme_countries),]
+
 
 rm(required_cols, imf_raw, imf_subset, eme_countries, eme_year_grid, filename)
