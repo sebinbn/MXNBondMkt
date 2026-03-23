@@ -5,7 +5,7 @@
 #
 # INPUT:  <DATA_RAW>/IIP_lblty_GG_vOct2025.csv (in Mns USD)
 #         
-# OUTPUT: <DATA_CLEAN>/IMF_GDebt_FO_EM_2004_2024.csv (in Bns USD)
+# OUTPUT: <DATA_CLEAN>/IMF_GDebt_FO_EM_2004-24.csv (in Tns USD)
 #         
 # CALLED BY: MXNBnd_Replicate.R
 
@@ -16,7 +16,6 @@ required_cols = c("COUNTRY", "TIME_PERIOD", "OBS_VALUE")
 imf_raw = read.csv(file.path(DATA_RAW, "IIP_lblty_GG_vOct2025.csv" ),
                    check.names = FALSE)
 imf_raw = imf_raw[,c("COUNTRY", "TIME_PERIOD", "OBS_VALUE")]
-imf_raw$TIME_PERIOD = as.integer(imf_raw$TIME_PERIOD)
 imf_raw$OBS_VALUE = as.numeric(imf_raw$OBS_VALUE)
 
 imf_subset = imf_raw[imf_raw$TIME_PERIOD >= 2004 & imf_raw$TIME_PERIOD <= 2024,]
@@ -40,7 +39,7 @@ eme_year_grid = expand.grid(Country = eme_countries, Year = 2004:2024,
 GDebt_FO_EM = merge(eme_year_grid,imf_subset,
                     by.x = c("Country", "Year"),  by.y = c("COUNTRY", "TIME_PERIOD"),
                     all.x = TRUE)
-GDebt_FO_EM$OBS_VALUE = GDebt_FO_EM$OBS_VALUE/1000  #converting to Bns of USD
+GDebt_FO_EM$OBS_VALUE = GDebt_FO_EM$OBS_VALUE/1000000  #converting to Tns of USD
 
 message(sprintf(
   "Note: EMEs that dont have data in IMF PIP dataset for any year between 2004 and 2024 are: \n%s",
@@ -65,13 +64,13 @@ GDebt_FO_EM$Total = rowSums(GDebt_FO_EM[,names(GDebt_FO_EM) != "Year"], na.rm = 
 
 
 # 4. Save data, remove intermediates ------------------------------------------
-
-write.csv(GDebt_FO_EM, file = file.path(DATA_CLEAN, "IMF_EM_GDebt_2004-24.csv"),
+filename = "IMF_EM_GDebt_2004-24.csv"
+write.csv(GDebt_FO_EM, file = file.path(DATA_CLEAN, filename),
     row.names = FALSE )
 
 message(sprintf(
   "Table with EME's Foreign Owned Gov debt saved in %s",
-  file.path(getwd(), DATA_CLEAN, "IMF_EME_GovDebt_2004_2024.csv")
+  file.path(getwd(), DATA_CLEAN, filename)
 ))
 
-rm(required_cols, imf_raw, imf_subset, eme_countries, eme_year_grid)
+rm(required_cols, imf_raw, imf_subset, eme_countries, eme_year_grid, filename)
