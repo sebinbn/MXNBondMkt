@@ -104,7 +104,7 @@ save_FO_Plot(GDebt_Share_plot, "FOInGDebt_share_2004-24.png")
 df_2024 = Extract_2024(GDebt_shares)
 
 GDebt_share_bar = ggplot(df_2024, aes(x = Country, y = Value)) +
-  geom_bar(stat = "identity", fill = "blue") +
+  geom_bar(stat = "identity", fill = "forestgreen") +
   scale_y_continuous(expand = c(0, 0)) +
   labs(x = NULL,y = "Share of GDP") +
   bar_theme
