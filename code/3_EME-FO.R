@@ -27,9 +27,8 @@ GDebt_FO_plot <- ggplot(data = PlotData, aes(x = Year, y = Total, group = 1)) +
 GDebt_FO_plot
 
 filename = "FOInGDebt_2004-24.png"
-ggsave(file.path(FIG_PATH, filename),
-  plot = EM_plot,
-  width = 10,  height = 6,  dpi = 300)
+ggsave(file.path(FIG_PATH, filename),  plot = GDebt_FO_plot,
+        width = 10,  height = 6,  dpi = 300)
 
 message(sprintf("Plot of EM's FO GovDebt over time saved in %s",
                 file.path(getwd(), FIG_PATH, filename) ))
@@ -52,8 +51,7 @@ GDebt_Share_plot <- ggplot(data = PlotData, aes(x = Year, y = Total, group = 1))
 GDebt_Share_plot
 
 filename = "FOInGDebt_share_2004-24.png"
-ggsave(file.path(FIG_PATH, filename),
-       plot = EM_plot,
+ggsave(file.path(FIG_PATH, filename), plot = GDebt_Share_plot,
        width = 10,  height = 6,  dpi = 300)
 
 message(sprintf("Plot of EM's FO GovDebt as share of GDP over time saved in %s",
