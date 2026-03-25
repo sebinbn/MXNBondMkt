@@ -20,7 +20,7 @@ SUREIV_plot = ggplot(Y_FO_Dat, aes(x =Var)) +
   geom_point(aes(y = F_Own_coef), size = 2) +
   geom_errorbar(aes(ymin = F_Own_coef - tFse, ymax = F_Own_coef + tFse), width = 0.2, color = "blue") +  # tF Error bars
   #geom_errorbar(aes(ymin = F_Own_coef - se, ymax = F_Own_coef + se), width = 0.2, color = "blue") +  # Error bars
-  geom_hline(yintercept = 0, linetype = "dashed", color = "red", size = 1) + 
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red", linewidth = 1) + 
   scale_x_discrete(breaks = Y_FO_Dat$Var[seq(1, length(Y_FO_Dat$Var), by = 2)])+
   labs(x = 'Maturity', y = 'Basis points')+
   theme_minimal()+
@@ -34,7 +34,7 @@ SUREIV_plot = ggplot(Y_FO_Dat, aes(x =Var)) +
 # 5. Save -----------------------------------------------------------------
 
 filename = "Y_FO_SUREIV.png"
-ggsave(file.path(FIG_PATH,filename), plot = Mat_plot,
+ggsave(file.path(FIG_PATH,filename), plot = SUREIV_plot,
        width = 10, height = 6, dpi = 300)
 
 message(sprintf("Plot of SURE-IV results saved as %s",
