@@ -104,7 +104,8 @@ GDP_EM <- GDP_EM[, c("Year", setdiff(names(GDP_EM), "Year"))]
 GDebt_shares = data.frame(
   Year = GDebt_FO_EM$Year,
   GDebt_FO_EM[,!names(GDebt_FO_EM) %in% c("Year", "Total")]/
-    GDP_EM[,names(GDP_EM) != "Year"]
+    GDP_EM[,names(GDP_EM) != "Year"], #this division assumes that columns are ordered similarly in both, make robust later
+  check.names = F
 )
 
 GDebt_shares$Total = rowMeans(GDebt_shares[, names(GDebt_shares) != "Year"], na.rm = TRUE)
