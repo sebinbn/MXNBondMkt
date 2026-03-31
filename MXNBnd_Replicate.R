@@ -30,7 +30,7 @@ source("code/1_6_IMF-PIP-EMDataCreate.R")
 
 # Data Analysis
 source("code/2_1_SummStats.R")
-source("code/2_2_ADFTest.R")
+source("code/2_2_ADF_Johansen.R")
 source("code/2_3_SUREIV.R")
 source("code/2_4_TVVAR.R")
 source("code/TVVARmods.R")
