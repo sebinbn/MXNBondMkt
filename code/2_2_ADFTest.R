@@ -7,7 +7,7 @@
 # OUTPUT: ADF_d_tab, ADF_m_tab
 # CALLED BY: MXNBnd_Replicate.R
 
-# Function to run ADF Test and tabulate results -------------------------------
+# Functions to run ADF Test, Johansen test and tabulate results ----------------
 
 # Run ADF tests on levels and first differences
 run_adf <- function(data, vars) {
@@ -28,6 +28,15 @@ tabulate_adf <- function(levels, diff, vars) {
   colnames(ADF_tab) <- c("Variable", "Level: t-stat", "Level: p-value",
                            "Diff: t-stat",  "Diff: p-value")
   ADF_tab
+}
+
+run_johansen <- function(data, vars, lag_k = 5) {
+  cajo_none <- ca.jo(data[, vars], type = "trace", ecdet = "none", K = lag_k)
+  cajo_const <- ca.jo(data[, vars], type = "trace", ecdet = "const", K = lag_k)
+  cajo_trend <- ca.jo(data[, vars], type = "trace", ecdet = "trend", K = lag_k)
+  
+  list(spec_vars = vars, lag_k = lag_k,
+       none = cajo_none, const = cajo_const, trend = cajo_trend )
 }
 
 # ADF Test on Daily Data used in TVVAR -----------------------------------------
@@ -59,6 +68,22 @@ ADF_m_tab <- tabulate_adf(adf_levels, adf_diff, Vars_m_ADF)
 # Save table
 write.csv(ADF_m_tab, file = file.path(TAB_PATH, "ADF_results_monthly.csv"), 
           row.names = FALSE)
+
+# Johansen Cointegration Test ---------------------------------------------
+
+
+JOHANSEN_1mo <- run_johansen(
+  data = Mex_d,
+  vars = c("TIIE", "MXY01M", "MXY30Y", "MXN_USD"),
+  lag_k = 5
+)
+print(summary(JOHANSEN_1mo$const$test))
+
+JOHANSEN_6mo <- run_johansen(
+  data = Mex_d,
+  vars = c("TIIE", "MXY06M", "MXY30Y", "MXN_USD"),
+  lag_k = 5
+)
 
 
 
