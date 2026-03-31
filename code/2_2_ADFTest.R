@@ -2,9 +2,10 @@
 #   1. Run ADF test at levels and first difference on daily and monthly data,
 #      and save results.
 #   Daily data ADF run for select variables considered for TVVAR and its robustness.
+#   2. Run Johansen Test for cointegration for both VAR specifications tried.
 #
 # INPUT:  Mex_d, Mex_d_diff, Mex_m, Mex_m_diff
-# OUTPUT: ADF_d_tab, ADF_m_tab
+# OUTPUT: ADF_d_tab, ADF_m_tab, JOHANSEN_1mo, JOHANSEN_6mo
 # CALLED BY: MXNBnd_Replicate.R
 
 # Functions to run ADF Test, Johansen test and tabulate results ----------------
@@ -69,7 +70,7 @@ ADF_m_tab <- tabulate_adf(adf_levels, adf_diff, Vars_m_ADF)
 write.csv(ADF_m_tab, file = file.path(TAB_PATH, "ADF_results_monthly.csv"), 
           row.names = FALSE)
 
-# Johansen Cointegration Test ---------------------------------------------
+# Johansen Cointegration Test on Daily Data------------------------------------
 
 
 JOHANSEN_1mo <- run_johansen(
@@ -77,7 +78,8 @@ JOHANSEN_1mo <- run_johansen(
   vars = c("TIIE", "MXY01M", "MXY30Y", "MXN_USD"),
   lag_k = 5
 )
-print(summary(JOHANSEN_1mo$const$test))
+print(summary(JOHANSEN_1mo$const))
+
 
 JOHANSEN_6mo <- run_johansen(
   data = Mex_d,
@@ -89,7 +91,8 @@ JOHANSEN_6mo <- run_johansen(
 
 # removing intermediate variables no longer necessary -------------------------
 
-rm(adf_levels, adf_diff, run_adf, tabulate_adf, Vars_m_ADF, Vars_TVVAR)
+rm(adf_levels, adf_diff, run_adf, tabulate_adf,run_johansen, 
+   Vars_m_ADF, Vars_TVVAR)
 
 message(sprintf("ADF test run on daily and monthly data. Result saved in %s, daily results in %s and monthly results in %s",
                 paste(getwd(),TAB_PATH,sep = "/"), "ADF_results_daily.csv",
