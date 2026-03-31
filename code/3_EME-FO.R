@@ -18,15 +18,15 @@
 
 # Setting lineplot theme
 lineplot_theme <- theme_minimal() + theme(
-  axis.text.y = element_text(size = 17,angle = 90),
+  axis.text.y = element_text(size = 20,angle = 90),
   axis.title = element_text(size = 20),
-  axis.text.x = element_text(size = 15) )
+  axis.text.x = element_text(angle=45, vjust = 1,hjust = 1,size = 20) )
 
 # Setting barchart theme controls
 bar_theme = theme_minimal() + theme(
-  axis.text.x = element_text(angle=45, vjust = 1,hjust = 1,size = 14),
-  axis.text = element_text(size=15),
-  axis.title = element_text(size=17) )
+  axis.text.x = element_text(angle=45, vjust = 1,hjust = 1,size = 20),
+  axis.text.y = element_text(size=20),
+  axis.title = element_text(size=20) )
 
 # Function to save plot
 
@@ -64,7 +64,7 @@ PlotData$Year = as.Date(paste0(PlotData$Year, "-01-01"))
 
 GDebt_FO_plot <- ggplot(data = PlotData, aes(x = Year, y = Total, group = 1)) +
   geom_line(color = "darkblue", linewidth = 1.25) +
-  scale_x_date(date_breaks = "2 years", date_labels = "%Y") +
+  scale_x_date(date_breaks = "4 years", date_labels = "%Y") +
   labs(y = "Billions of $", x = NULL) +
   lineplot_theme
 
@@ -90,7 +90,7 @@ PlotData$Year = as.Date(paste0(PlotData$Year, "-01-01"))
 
 GDebt_Share_plot <- ggplot(data = PlotData, aes(x = Year, y = Total, group = 1)) +
   geom_line(color = "forestgreen", linewidth = 1.25) +
-  scale_x_date(date_breaks = "2 years", date_labels = "%Y") +
+  scale_x_date(date_breaks = "4 years", date_labels = "%Y") +
   scale_y_continuous(
     breaks = seq(0.06, max(PlotData$Total, na.rm = TRUE), by = 0.02)
   ) +

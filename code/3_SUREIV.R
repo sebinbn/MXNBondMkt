@@ -24,12 +24,10 @@ SUREIV_plot = ggplot(Y_FO_Dat, aes(x =Var)) +
   scale_x_discrete(breaks = Y_FO_Dat$Var[seq(1, length(Y_FO_Dat$Var), by = 2)])+
   labs(x = 'Maturity', y = 'Basis points')+
   theme_minimal()+
-  theme(title = element_text(size = 16),
-        axis.text.x = element_text(angle = 45, hjust = 1), 
-        axis.text = element_text(size = 16),
-        axis.title = element_text(size = 16),
-        legend.text = element_text(size = 16 ),
-        legend.title = element_blank(), legend.position = c(0.2, 0.9))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), 
+        axis.text = element_text(size = 20),
+        axis.title = element_text(size = 20))
+        
 
 # 5. Save -----------------------------------------------------------------
 
