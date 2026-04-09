@@ -14,20 +14,22 @@
 run_adf <- function(data, vars) {
   lapply(vars, function(v) {
     res <- summary(ur.df(data[[v]], type = "none", selectlags = "AIC"))
-    round(res@testreg$coefficients[1, c("t value", "Pr(>|t|)")],3)
-    })
+    x = c(t_stat = res@testreg$coefficients["z.lag.1", "t value"],
+          p_val = punitroot(res@teststat[,"tau1"], trend = "nc") )
+    round(x,3)
+  })
 }
 
 tabulate_adf <- function(levels, diff, vars) {
   ADF_tab <- data.frame(
     Variable      = vars,
-    Level_tstat = sapply(levels, function(x) x[["t value"]]),
-    Level_pval  = sapply(levels, function(x) x[["Pr(>|t|)"]]),
-    Diff_tstat  = sapply(diff,  function(x) x[["t value"]]),
-    Diff_pval   = sapply(diff,  function(x) x[["Pr(>|t|)"]])
+    Level_tstat = sapply(levels, function(x) x[["t_stat"]]),
+    Level_pval  = sapply(levels, function(x) x[["p_val"]]),
+    Diff_tstat  = sapply(diff,  function(x) x[["t_stat"]]),
+    Diff_pval   = sapply(diff,  function(x) x[["p_val"]])
   )
   colnames(ADF_tab) <- c("Variable", "Level: t-stat", "Level: p-value",
-                           "Diff: t-stat",  "Diff: p-value")
+                         "Diff: t-stat",  "Diff: p-value")
   ADF_tab
 }
 
@@ -49,6 +51,7 @@ adf_levels <- run_adf(Mex_d,  Vars_TVVAR)
 adf_diff  <- run_adf(Mex_d_diff, Vars_TVVAR)
 
 ADF_d_tab <- tabulate_adf(adf_levels, adf_diff, Vars_TVVAR)
+
 
 # Save table
 write.csv(ADF_d_tab, file = file.path(TAB_PATH, "ADF_results_daily.csv"),
